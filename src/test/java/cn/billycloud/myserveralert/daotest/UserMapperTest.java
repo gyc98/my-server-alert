@@ -17,7 +17,7 @@ public class UserMapperTest {
 
     @Test
     public void insertTest(){
-        UserInfo userInfo = new UserInfo("test_user", "123", new Date(), new Date());
+        UserInfo userInfo = new UserInfo("test_user", "", "123", new Date(), new Date());
         int res = userMapper.insert(userInfo);
         if(res > 0){
             System.out.println("user_id: " + userInfo.getUserID());

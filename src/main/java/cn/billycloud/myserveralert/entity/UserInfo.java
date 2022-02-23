@@ -5,16 +5,17 @@ import java.util.Date;
 //用户信息 javabean
 public class UserInfo {
     private long userID = -1;//缺省值
-    private String userName, password;
+    private String userName, passwordHash, salt;
     private Date registrationTime, lastLoginTime;
 
     public UserInfo(){
 
     }
 
-    public UserInfo(String userName, String password, Date registrationTime, Date lastLoginTime) {
+    public UserInfo(String userName, String salt, String passwordHash, Date registrationTime, Date lastLoginTime) {
         this.userName = userName;
-        this.password = password;
+        this.salt = salt;
+        this.passwordHash = passwordHash;
         this.registrationTime = registrationTime;
         this.lastLoginTime = lastLoginTime;
     }
@@ -35,14 +36,6 @@ public class UserInfo {
         this.userName = userName;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public Date getRegistrationTime() {
         return registrationTime;
     }
@@ -57,6 +50,22 @@ public class UserInfo {
 
     public void setLastLoginTime(Date lastLoginTime) {
         this.lastLoginTime = lastLoginTime;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
     }
 
     @Override
