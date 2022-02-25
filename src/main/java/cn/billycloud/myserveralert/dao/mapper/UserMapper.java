@@ -21,6 +21,7 @@ public interface UserMapper {
             @Result(property = "passwordHash", column = "password_hash"),
             @Result(property = "registrationTime", column = "registration_time"),
             @Result(property = "lastLoginTime", column = "last_login_time"),
+            @Result(property = "cookie", column = "cookie"),
     })
     List<UserInfo> selectAll();
 
@@ -32,11 +33,18 @@ public interface UserMapper {
             @Result(property = "passwordHash", column = "password_hash"),
             @Result(property = "registrationTime", column = "registration_time"),
             @Result(property = "lastLoginTime", column = "last_login_time"),
+            @Result(property = "cookie", column = "cookie"),
     })
     UserInfo selectByUserID(long userID);
 
     @Update("UPDATE user_info SET last_login_time = #{lastLoginTime} WHERE user_id = #{userID}")
     int updateLastLoginTime(@Param("userID") long userID, @Param("lastLoginTime") Date lastLoginTime);
+
+    @Update("UPDATE user_info SET cookie = #{cookie} WHERE user_id = #{userID}")
+    int updateCookie(@Param("userID") long userID, @Param("cookie") String cookie);
+
+    @Update("UPDATE user_info SET last_login_time = #{lastLoginTime}, cookie = #{cookie} WHERE user_id = #{userID}")
+    int updateLastLoginTimeAndCookie(@Param("userID") long userID, @Param("lastLoginTime") Date lastLoginTime, @Param("cookie") String cookie);
 
 
 }

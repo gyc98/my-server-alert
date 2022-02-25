@@ -7,6 +7,7 @@ public class UserInfo {
     private long userID = -1;//缺省值
     private String userName, passwordHash, salt;
     private Date registrationTime, lastLoginTime;
+    private String cookie;
 
     public UserInfo(){
 
@@ -66,6 +67,14 @@ public class UserInfo {
 
     public void setSalt(String salt) {
         this.salt = salt;
+    }
+
+    public String getCookie() {
+        return cookie;
+    }
+
+    public void setCookie(String cookie) {
+        this.cookie = cookie;
     }
 
     @Override

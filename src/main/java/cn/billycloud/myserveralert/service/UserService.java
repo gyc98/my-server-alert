@@ -1,7 +1,9 @@
 package cn.billycloud.myserveralert.service;
 
 import cn.billycloud.myserveralert.dao.mapper.UserMapper;
+import cn.billycloud.myserveralert.entity.CookieInfo;
 import cn.billycloud.myserveralert.entity.UserInfo;
+import cn.billycloud.myserveralert.util.MyException;
 import cn.billycloud.myserveralert.util.Result;
 import cn.billycloud.myserveralert.util.ResultCode;
 import lombok.extern.slf4j.Slf4j;
@@ -86,15 +88,23 @@ public class UserService {
         try {
             String passwordHash = getSHA256StrJava(userInfo.getSalt() + passwordInput);
             if(passwordHash.equals(userInfo.getPasswordHash())){
+                //登录成功之后 为用户生成一个cookie信息
+                CookieInfo cookieInfo = CookieInfo.generate(userInfo);
+
                 //密码一致
                 //更新登录时间
-                userMapper.updateLastLoginTime(userID, new Date());
-                return Result.success(ResultCode.SUCCESS, userInfo);
+                int res = userMapper.updateLastLoginTimeAndCookie(userID, new Date(), cookieInfo.getCookieVal());
+                if(res > 0){
+                    return Result.success(ResultCode.SUCCESS, cookieInfo);
+                }else{
+                    //密码不对
+                    return Result.failure(ResultCode.FAILURE, "无法登录");
+                }
             }else{
                 //密码不对
-                return Result.failure(ResultCode.FAILURE, "密码错误");
+                return Result.failure(ResultCode.DATA_IS_WRONG, "密码错误");
             }
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException | MyException e) {
             log.error("校验密码出错", e);
             return Result.failure(ResultCode.FAILURE, e.getMessage());
         }

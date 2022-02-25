@@ -31,4 +31,14 @@ public class UserController {
         Result result = userService.addNewUser(userName, passwordSet);
         return result;
     }
+
+    @RequestMapping("/login")
+    @ResponseBody
+    public Result login(@RequestBody JSONObject jsonObject){
+        String userID = jsonObject.getString("userID");
+        String passwordInput = jsonObject.getString("passwordInput");
+        log.info("收到登录请求 用户账号：" + userID + " 密码：" + passwordInput);
+        Result result = userService.userLogin(userID, passwordInput);
+        return result;
+    }
 }
