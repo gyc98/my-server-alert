@@ -27,6 +27,9 @@ public class UserService {
     private UserMapper userMapper;
 
     public Result addNewUser(String userName, String passwordSet) {
+        if(userName == null || passwordSet == null){
+            return Result.failure(ResultCode.DATA_IS_WRONG, "缺少参数");
+        }
         //用户名和密码都不能为空
         if(userName.isEmpty()){
             return Result.failure(ResultCode.DATA_IS_WRONG, "用户名不能为空");
@@ -110,6 +113,22 @@ public class UserService {
         }
     }
 
+    //检查cookie
+    public UserInfo checkCookie(CookieInfo cookieInfo) {
+        try {
+            UserInfo userInfo = userMapper.selectByCookie(cookieInfo.getCookieVal());
+            if(userInfo.getUserID() == cookieInfo.getUserID() && userInfo.getUserName().equals(cookieInfo.getUserName())){
+                return userInfo;
+            }else{
+                return null;
+            }
+        }catch (Exception e){
+            log.info("cookie检查异常", e);
+            return null;
+        }
+
+    }
+
 
     //辅助方法
 
@@ -151,5 +170,6 @@ public class UserService {
         }
         return hexString.toString().toLowerCase();
     }
+
 
 }

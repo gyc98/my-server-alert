@@ -1,0 +1,92 @@
+<!doctype html>
+<html class="no-js">
+
+    <head>
+        <meta charset="utf-8">
+        <title>Hello Amaze UI</title>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/amazeui/2.7.2/css/amazeui.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/amazeui/2.7.2/js/amazeui.js"></script>
+
+    </head>
+    <body>
+        <header data-am-widget="header"
+                class="am-header am-header-default">
+            <h1 class="am-header-title">
+                <a href="#title-link">
+                    My Server Alert
+                </a>
+            </h1>
+        </header>
+
+        <br/>
+        <br/>
+
+        <div class="am-g">
+            <div class="am-u-sm-3">
+                <ul class="am-nav">
+                    <li><a href="index.html">首页</a></li>
+                    <li class="am-active"><a href="#">注册</a></li>
+                    <li><a href="login.html">登录</a></li>
+                    <li><a href="setting.html">设置</a></li>
+                </ul>
+            </div>
+            <div class="am-u-sm-9">
+                <div class="am-panel am-panel-default">
+                    <div class="am-panel-bd">
+                        <!-- 注册 -->
+                        <form class="am-form">
+                            <fieldset>
+                                <legend>注册</legend>
+                            
+                                <div class="am-form-group">
+                                    <label>用户名</label>
+                                    <input class="am-form-field am-radius" id="usernameInput" placeholder="输入用户名">
+                                </div>
+                            
+                                <div class="am-form-group">
+                                    <label for="doc-ipt-pwd-1">密码</label>
+                                    <input type="password" class="am-form-field am-radius" id="passwordInput" placeholder="设置密码">
+                                </div>
+                            
+                                <p><input type="button" value="提交" class="am-btn am-btn-default" id="submit"></button></p>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // $.ajaxSetup({contentType: "application/json; charset=utf-8"});
+
+            $("#submit").click(function(){
+
+                $.ajax({
+                    type: "POST",
+                    url: '/user/register',
+                    dataType: "json",
+                    data: {
+                        userName: $("#usernameInput").val(),
+                        passwordSet: $("#passwordInput").val()
+                    },
+                    success: function (data) {
+                        // alert("Data: " + data);
+                        if(data['code'] == 1){
+                            //注册成功
+                            userID = data['data'];
+                            alert("注册成功，请记住账号: " + userID);
+                        }else{
+                            alert(data['msg'] + '\n' + data['data']);
+                        }
+                    }
+                });
+
+            });
+            
+        </script>
+
+
+    </body>
+</html>

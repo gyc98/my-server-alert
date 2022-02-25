@@ -37,6 +37,18 @@ public interface UserMapper {
     })
     UserInfo selectByUserID(long userID);
 
+    @Select("SELECT * FROM user_info WHERE cookie = #{cookie}")
+    @Results({
+            @Result(property = "userID",  column = "user_id"),
+            @Result(property = "userName", column = "user_name"),
+            @Result(property = "salt", column = "salt"),
+            @Result(property = "passwordHash", column = "password_hash"),
+            @Result(property = "registrationTime", column = "registration_time"),
+            @Result(property = "lastLoginTime", column = "last_login_time"),
+            @Result(property = "cookie", column = "cookie"),
+    })
+    UserInfo selectByCookie(String cookie);
+
     @Update("UPDATE user_info SET last_login_time = #{lastLoginTime} WHERE user_id = #{userID}")
     int updateLastLoginTime(@Param("userID") long userID, @Param("lastLoginTime") Date lastLoginTime);
 

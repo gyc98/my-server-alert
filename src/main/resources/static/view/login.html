@@ -1,0 +1,124 @@
+<!doctype html>
+<html class="no-js">
+
+    <head>
+        <meta charset="utf-8">
+        <title>Hello Amaze UI</title>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/amazeui/2.7.2/css/amazeui.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/amazeui/2.7.2/js/amazeui.js"></script>
+        <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+    </head>
+    <body>
+        <header data-am-widget="header"
+                class="am-header am-header-default">
+            <h1 class="am-header-title">
+                <a href="#title-link">
+                    My Server Alert
+                </a>
+            </h1>
+        </header>
+
+        <br/>
+        <br/>
+
+        <div class="am-g">
+            <div class="am-u-sm-3">
+                <ul class="am-nav">
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="register.html">注册</a></li>
+                    <li class="am-active"><a href="#">登录</a></li>
+                    <li><a href="setting.html">设置</a></li>
+                </ul>
+            </div>
+            <div class="am-u-sm-9">
+                <div class="am-panel am-panel-default">
+                    <div class="am-panel-bd">
+                        <!-- 登录 -->
+                        <form class="am-form" id = "loginForm">
+                            <fieldset>
+                                <legend>登录</legend>
+                            
+                                <div class="am-form-group">
+                                    <label>用户账号</label>
+                                    <input class="am-form-field am-radius" id="userIDInput" placeholder="输入账号">
+                                </div>
+                            
+                                <div class="am-form-group">
+                                    <label for="doc-ipt-pwd-1">密码</label>
+                                    <input type="password" class="am-form-field am-radius" id="passwordInput" placeholder="输入密码">
+                                </div>
+                            
+                                <p><input type="button" value="提交" class="am-btn am-btn-default" id="submit"></button></p>
+                            </fieldset>
+                        </form>
+
+                        <!-- 显示登录信息 -->
+                        <div id = "loginInfoDiv" hidden>
+                            <div class="am-form-group">
+                                <label>用户账号</label>
+                                <input class="am-form-field am-radius" id="loginUserID" readonly>
+                            </div>
+                            <div class="am-form-group">
+                                <label>用户名</label>
+                                <input class="am-form-field am-radius" id="loginUserName" readonly>
+                            </div>
+                            <p><input type="button" value="退出当前账号" class="am-btn am-btn-default" id="exit"></button></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            $(function(){
+                //先判断cookie
+                userName = $.cookie("msa_userName");
+                userID = $.cookie("msa_userID");
+                cookieVal = $.cookie("msa_cookieVal");
+                if(userName != null && userID != null && cookieVal != null){
+                    $("#loginForm").hide();
+                    $("#loginUserID").val(userID);
+                    $("#loginUserName").val(userName);
+                    $("#loginInfoDiv").show();
+                }
+            });
+
+            $("#exit").click(function(){
+                $.removeCookie('msa_userName', { path: '/' });
+                $.removeCookie('msa_userID', { path: '/' });
+                $.removeCookie('msa_cookieVal', { path: '/' });
+                //刷新
+                window.location.reload()
+            });
+
+            $("#submit").click(function(){
+
+                $.ajax({
+                    type: "POST",
+                    url: '/user/login',
+                    dataType: "json",
+                    data: {
+                        userID: $("#userIDInput").val(),
+                        passwordInput: $("#passwordInput").val()
+                    },
+                    success: function (data) {
+                        if(data['code'] == 1){
+                            alert('登录成功');
+                            //刷新
+                            window.location.reload()
+                        }else{
+                            alert(data['msg'] + '\n' + data['data']);
+                        }
+                    }
+                });
+
+            });
+            
+        </script>
+
+
+    </body>
+</html>
