@@ -1,5 +1,6 @@
 package cn.billycloud.myserveralert.workweixintest;
 
+import cn.billycloud.myserveralert.entity.WorkWeixinAccessTokenInfo;
 import cn.billycloud.myserveralert.service.workweixin.AccessTokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ public class AccessTokenTest {
 
     @Test
     public void test(){
-        accessTokenService.requestAccessToken();
+        WorkWeixinAccessTokenInfo workWeixinAccessTokenInfo = accessTokenService.getWorkWeixinAccessToken(22);
+        System.out.println(workWeixinAccessTokenInfo.getAccessToken());
+        System.out.println(workWeixinAccessTokenInfo.getExpireTime());
     }
 }

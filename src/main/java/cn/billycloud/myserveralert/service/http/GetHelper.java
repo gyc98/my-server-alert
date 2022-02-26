@@ -31,7 +31,7 @@ public class GetHelper {
                 if(addFlag){
                     url += "&";
                 }
-                url += entry.getKey() + "=" + entry.getValue();
+                url += URLEncoder.encode(entry.getKey(),"utf-8") + "=" + URLEncoder.encode(entry.getValue(),"utf-8");//entry.getKey() + "=" + entry.getValue();
                 addFlag = true;
             }
         }

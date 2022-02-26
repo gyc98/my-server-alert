@@ -1,0 +1,148 @@
+<!doctype html>
+<html class="no-js">
+
+    <head>
+        <meta charset="utf-8">
+        <title>Hello Amaze UI</title>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/amazeui/2.7.2/css/amazeui.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/amazeui/2.7.2/js/amazeui.js"></script>
+        <script src="https://cdn.staticfile.org/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+    </head>
+    <body>
+        <header data-am-widget="header"
+                class="am-header am-header-default">
+            <h1 class="am-header-title">
+                <a href="#title-link">
+                    My Server Alert
+                </a>
+            </h1>
+        </header>
+
+        <br/>
+        <br/>
+
+        <div class="am-g">
+            <div class="am-u-sm-3">
+                <ul class="am-nav">
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="register.html">注册</a></li>
+                    <li><a href="login.html">登录</a></li>
+                    <li class="am-active"><a href="#">设置</a></li>
+                </ul>
+            </div>
+            <div class="am-u-sm-9">
+                <div class="am-panel am-panel-default">
+                    <div class="am-panel-bd">
+                        <!-- 设置 -->
+                        <form class="am-form" id = "settingForm">
+                            <fieldset>
+                                <legend>PUSH设置</legend>
+                                
+                                <div class="am-form-group">
+                                    <label>企业微信</label>
+                                </div>
+
+                                <div class="am-form-group">
+                                    <label>corpid</label>
+                                    <input class="am-form-field am-radius" id="corpidInput">
+                                </div>
+
+                                <div class="am-form-group">
+                                    <label>corpsecret</label>
+                                    <input class="am-form-field am-radius" id="corpsecretInput">
+                                </div>
+
+                                <div class="am-form-group">
+                                    <label>agentid</label>
+                                    <input class="am-form-field am-radius" id="agentidInput">
+                                </div>
+
+                                <div class="am-form-group">
+                                    <label>touser</label>
+                                    <input class="am-form-field am-radius" id="touserInput">
+                                </div>
+                            
+                                <p><input type="button" value="保存" class="am-btn am-btn-default" id="submit"></button></p>
+                            </fieldset>
+                        </form>
+
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            $(function(){
+                //先判断cookie
+                userName = $.cookie("msa_userName");
+                userID = $.cookie("msa_userID");
+                cookieVal = $.cookie("msa_cookieVal");
+                if(userName == null || userID == null || cookieVal == null){
+                    clearCookie();
+                }else{
+                    getSetting();
+                }
+            });
+
+            function clearCookie(){
+                $.removeCookie('msa_userName', { path: '/' });
+                $.removeCookie('msa_userID', { path: '/' });
+                $.removeCookie('msa_cookieVal', { path: '/' });
+                //未登录 返回登录界面
+                window.location.href="login.html"
+            }
+
+            function getSetting(){
+                $.ajax({
+                    type: "POST",
+                    url: '/pushsetting/get',
+                    dataType: "json",
+                    success: function (data) {
+                        if(data['code'] == 1){
+                            //填充
+                            setting = data['data'];
+                            $('#corpidInput').val(setting['workWeixinCorpID']);
+                            $('#corpsecretInput').val(setting['workWeixinCorpSecret']);
+                            $('#agentidInput').val(setting['workWeixinAgentID']);
+                            $('#touserInput').val(setting['workWeixinToUser']);
+                        }else if(data['code'] == 20001){
+                            //未登录 跳转
+                            clearCookie();
+                        }
+                    }
+                });
+            }
+
+            $("#submit").click(function(){
+
+                $.ajax({
+                    type: "POST",
+                    url: '/pushsetting/set',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                        workWeixinCorpID: $('#corpidInput').val(),
+                        workWeixinCorpSecret: $('#corpsecretInput').val(),
+                        workWeixinAgentID: $('#agentidInput').val(),
+                        workWeixinToUser: $('#touserInput').val(),
+                    }),
+                    success: function (data) {
+                        if(data['code'] == 1){
+                            alert('保存成功');
+                        }else{
+                            alert(data['msg'] + '\n' + data['data']);
+                        }
+                    }
+                });
+
+            });
+            
+        </script>
+
+
+    </body>
+</html>
