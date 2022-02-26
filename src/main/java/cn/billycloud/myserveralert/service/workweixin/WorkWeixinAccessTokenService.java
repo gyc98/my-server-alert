@@ -7,11 +7,9 @@ import cn.billycloud.myserveralert.service.UserPushSettingService;
 import cn.billycloud.myserveralert.service.http.GetHelper;
 import cn.billycloud.myserveralert.util.Result;
 import cn.billycloud.myserveralert.util.ResultCode;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -21,12 +19,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class AccessTokenService {
-//    @Value("${workweixin.corpid}")
-//    private String corpid;
-//    @Value("${workweixin.corpsecret}")
-//    private String corpsecret;
-
+public class WorkWeixinAccessTokenService {
     @Autowired
     private UserTokenMapper userTokenMapper;
     @Autowired
@@ -35,7 +28,7 @@ public class AccessTokenService {
     private final String url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken";
 
     //可能返回null
-    public WorkWeixinAccessTokenInfo getWorkWeixinAccessToken(long userID){
+    public WorkWeixinAccessTokenInfo getAccessToken(long userID){
         //先查询数据库
         WorkWeixinAccessTokenInfo workWeixinAccessTokenInfo = userTokenMapper.selectWorkWeixinToken(userID);
         if(workWeixinAccessTokenInfo != null && workWeixinAccessTokenInfo.getExpireTime().after(new Date())){
