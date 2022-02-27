@@ -69,7 +69,33 @@
                             </fieldset>
                         </form>
 
-                        
+                        <!--api key-->
+                        <form class="am-form" id = "settingForm">
+                            <fieldset>
+                                <legend>api_key</legend>
+
+                                <div class="am-form-group">
+                                    <label>api_key</label>
+                                    <input class="am-form-field am-radius" id="apikeyInput" readonly>
+                                </div>
+                            
+                                <p><input type="button" value="重新生成" class="am-btn am-btn-default" id="flushApikey"></button></p>
+                            </fieldset>
+                        </form>
+
+                        <!--推送测试-->
+                        <form class="am-form" id = "settingForm">
+                            <fieldset>
+                                <legend>推送测试</legend>
+
+                                <div class="am-form-group">
+                                    <label for="doc-ta-1">信息</label>
+                                    <textarea class="" rows="5" id="pushMessageInput"></textarea>
+                                </div>
+                            
+                                <p><input type="button" value="推送" class="am-btn am-btn-default" id="push"></button></p>
+                            </fieldset>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -85,6 +111,7 @@
                     clearCookie();
                 }else{
                     getSetting();
+                    getApiKey();
                 }
             });
 
@@ -117,6 +144,24 @@
                 });
             }
 
+            function getApiKey(){
+                $.ajax({
+                    type: "POST",
+                    url: '/apikey/get',
+                    dataType: "json",
+                    success: function (data) {
+                        if(data['code'] == 1){
+                            //填充
+                            apikey = data['data'];
+                            $('#apikeyInput').val(apikey);
+                        }else if(data['code'] == 20001){
+                            //未登录 跳转
+                            clearCookie();
+                        }
+                    }
+                });
+            }
+
             $("#submit").click(function(){
 
                 $.ajax({
@@ -136,6 +181,43 @@
                         }else{
                             alert(data['msg'] + '\n' + data['data']);
                         }
+                    }
+                });
+
+            });
+
+            $("#flushApikey").click(function(){
+                $.ajax({
+                    type: "POST",
+                    url: '/apikey/flush',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        if(data['code'] == 1){
+                            alert('保存成功');
+                            getApiKey();//刷新
+                        }else{
+                            alert(data['msg'] + '\n' + data['data']);
+                        }
+                    }
+                });
+
+            });
+
+            $("#push").click(function(){
+                $.ajax({
+                    type: "POST",
+                    url: '/message/push',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                        api_key: $('#apikeyInput').val(),
+                        message: $('#pushMessageInput').val()
+                    }),
+                    success: function (data) {
+                        code = data['code'];
+                        msg = data['msg'];
+                        alert("code: " + code + "\nmsg: " + msg);
                     }
                 });
 
