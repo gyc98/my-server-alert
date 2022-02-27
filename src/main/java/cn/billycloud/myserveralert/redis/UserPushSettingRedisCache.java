@@ -44,44 +44,75 @@ public class UserPushSettingRedisCache {
         }
 
         //缓存中没有 查询数据库
-        userPushSettingInfo = userPushSettingMapper.selectSetting(userID);
-        //加入到数据库中 如果为null保存空值 避免缓存穿透
-        if(userPushSettingInfo == null){
-            redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, "", 10, TimeUnit.SECONDS);
-            return Result.failure(ResultCode.RESULE_DATA_NONE);
-        }else{
-            String json = JSON.toJSON(userPushSettingInfo).toString();
-            redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, json, 1, TimeUnit.HOURS);
-            return Result.success(ResultCode.SUCCESS, userPushSettingInfo);//将对象返回
+        userPushSettingInfo = null;
+        try {
+            userPushSettingInfo = userPushSettingMapper.selectSetting(userID);
+        }catch (Exception e){
+            log.error("向数据库查询push setting异常", e);
         }
+
+        //加入到数据库中 如果为null保存空值 避免缓存穿透
+        try {
+            if(userPushSettingInfo == null){
+                redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, "", 10, TimeUnit.SECONDS);
+                return Result.failure(ResultCode.RESULE_DATA_NONE);
+            }else{
+                String json = JSON.toJSON(userPushSettingInfo).toString();
+                redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, json, 1, TimeUnit.HOURS);
+                return Result.success(ResultCode.SUCCESS, userPushSettingInfo);//将对象返回
+            }
+        }catch (Exception e){
+            log.error("向缓存中保存push setting异常", e);
+            return Result.failure(ResultCode.FAILURE);
+        }
+
     }
 
     //写入数据库
     public Result setUserPushSettingInfo(UserPushSettingInfo userPushSettingInfo){
         long userID = userPushSettingInfo.getUserID();
         //先将缓存中的值清空
-        redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, "", 10, TimeUnit.SECONDS);
-        String checkStr = (String) redisTemplate.opsForValue().get("UserPushSettingInfo_" + userID);
-        if(checkStr == null || !checkStr.isEmpty()){
-            //缓存中没有值或不为空
-            return Result.failure(ResultCode.FAILURE, "缓存检查失败");
+        try {
+            redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, "", 10, TimeUnit.SECONDS);
+            String checkStr = (String) redisTemplate.opsForValue().get("UserPushSettingInfo_" + userID);
+            if(checkStr == null || !checkStr.isEmpty()){
+                //缓存中没有值或不为空
+                return Result.failure(ResultCode.FAILURE, "缓存检查失败");
+            }
+        }catch (Exception e){
+            log.error("清空缓存中的push setting信息出错", e);
+            return Result.failure(ResultCode.FAILURE, "缓存清除失败");
         }
 
         //先保存到数据库
-        int res = userPushSettingMapper.addSetting(userPushSettingInfo);
-        if(res > 0){
-            //保存到缓存中
-            String json = JSON.toJSON(userPushSettingInfo).toString();
-            redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, json, 1, TimeUnit.HOURS);
-            checkStr = (String) redisTemplate.opsForValue().get("UserPushSettingInfo_" + userID);
-            if(checkStr != null && checkStr.equals(json)){
-                //缓存写入成功
-                return Result.success(ResultCode.SUCCESS, "写入成功");
-            }else {
-                return Result.success(ResultCode.FAILURE, "数据库写入成功，缓存更新失败");//缓存写入失败
-            }
-        }else{
-            return Result.failure(ResultCode.FAILURE, "保存到数据库失败");
+        int res = 0;
+        try {
+            res = userPushSettingMapper.addSetting(userPushSettingInfo);
+        }catch (Exception e){
+            log.error("向数据库中保存push setting信息出错", e);
+            return Result.failure(ResultCode.FAILURE, "写入数据库失败");
         }
+
+        try {
+            if(res > 0){
+                //保存到缓存中
+                String json = JSON.toJSON(userPushSettingInfo).toString();
+                redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, json, 1, TimeUnit.HOURS);
+                String checkStr = (String) redisTemplate.opsForValue().get("UserPushSettingInfo_" + userID);
+                if(checkStr != null && checkStr.equals(json)){
+                    //缓存写入成功
+                    return Result.success(ResultCode.SUCCESS, "写入成功");
+                }else {
+                    return Result.success(ResultCode.FAILURE, "数据库写入成功，缓存更新失败");//缓存写入失败
+                }
+            }else{
+                return Result.failure(ResultCode.FAILURE, "保存到数据库失败");
+            }
+        }catch (Exception e){
+            log.error("向缓存中保存push setting信息出错", e);
+            return Result.failure(ResultCode.FAILURE, "写入缓存失败");
+        }
+
+
     }
 }

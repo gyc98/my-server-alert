@@ -37,18 +37,30 @@ public class UserCookieRedisCache {
         }
 
         //先保存到数据库
-        int res = userMapper.updateLastLoginTimeAndCookie(userInfo.getUserID(), userInfo.getLastLoginTime(), cookie);
+        int res = 0;
+        try {
+            res = userMapper.updateLastLoginTimeAndCookie(userInfo.getUserID(), userInfo.getLastLoginTime(), cookie);
+        }catch (Exception e){
+            log.error("向数据库中保存cookie失败", e);
+        }
+
         if(res > 0){
-            //保存到缓存中
-            String json = JSON.toJSON(userInfo).toString();
-            redisTemplate.opsForValue().set(cacheKey, json, 1, TimeUnit.HOURS);
-            checkStr = (String) redisTemplate.opsForValue().get(cacheKey);
-            if(checkStr != null && checkStr.equals(json)){
-                //缓存写入成功
-                return Result.success(ResultCode.SUCCESS, "写入成功");
-            }else {
+            try {
+                //保存到缓存中
+                String json = JSON.toJSON(userInfo).toString();
+                redisTemplate.opsForValue().set(cacheKey, json, 1, TimeUnit.HOURS);
+                checkStr = (String) redisTemplate.opsForValue().get(cacheKey);
+                if(checkStr != null && checkStr.equals(json)){
+                    //缓存写入成功
+                    return Result.success(ResultCode.SUCCESS, "写入成功");
+                }else {
+                    return Result.success(ResultCode.FAILURE, "数据库写入成功，缓存更新失败");//缓存写入失败
+                }
+            }catch (Exception e){
+                log.error("向缓存中保存cookie失败", e);
                 return Result.success(ResultCode.FAILURE, "数据库写入成功，缓存更新失败");//缓存写入失败
             }
+
         }else{
             return Result.failure(ResultCode.FAILURE, "保存到数据库失败");
         }
@@ -78,17 +90,28 @@ public class UserCookieRedisCache {
         }
 
         //向数据库中获取
-        UserInfo userInfo = userMapper.selectByCookie(cookie);
-        if(userInfo != null){
-            //保存到缓存中
-            String json = JSON.toJSON(userInfo).toString();
-            redisTemplate.opsForValue().set(cacheKey, json, 1, TimeUnit.HOURS);
-            return Result.success(ResultCode.SUCCESS, userInfo);
-        }else{
-            redisTemplate.opsForValue().set(cacheKey, "", 10, TimeUnit.SECONDS);
-            return Result.success(ResultCode.RESULE_DATA_NONE);
+        UserInfo userInfo = null;
+        try {
+            userInfo = userMapper.selectByCookie(cookie);
+        }catch (Exception e){
+            log.error("向数据库中查询cookie失败");
+            return Result.success(ResultCode.FAILURE);
         }
 
+        try {
+            if(userInfo != null){
+                //保存到缓存中
+                String json = JSON.toJSON(userInfo).toString();
+                redisTemplate.opsForValue().set(cacheKey, json, 1, TimeUnit.HOURS);
+                return Result.success(ResultCode.SUCCESS, userInfo);
+            }else{
+                redisTemplate.opsForValue().set(cacheKey, "", 10, TimeUnit.SECONDS);
+                return Result.success(ResultCode.RESULE_DATA_NONE);
+            }
+        }catch (Exception e){
+            log.error("向缓存中保存cookie信息失败", e);
+            return Result.success(ResultCode.FAILURE);
+        }
     }
 
 
