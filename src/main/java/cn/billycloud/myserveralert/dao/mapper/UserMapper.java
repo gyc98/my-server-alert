@@ -49,11 +49,11 @@ public interface UserMapper {
     })
     UserInfo selectByCookie(String cookie);
 
-    @Update("UPDATE user_info SET last_login_time = #{lastLoginTime} WHERE user_id = #{userID}")
-    int updateLastLoginTime(@Param("userID") long userID, @Param("lastLoginTime") Date lastLoginTime);
-
-    @Update("UPDATE user_info SET cookie = #{cookie} WHERE user_id = #{userID}")
-    int updateCookie(@Param("userID") long userID, @Param("cookie") String cookie);
+//    @Update("UPDATE user_info SET last_login_time = #{lastLoginTime} WHERE user_id = #{userID}")
+//    int updateLastLoginTime(@Param("userID") long userID, @Param("lastLoginTime") Date lastLoginTime);
+//
+//    @Update("UPDATE user_info SET cookie = #{cookie} WHERE user_id = #{userID}")
+//    int updateCookie(@Param("userID") long userID, @Param("cookie") String cookie);
 
     @Update("UPDATE user_info SET last_login_time = #{lastLoginTime}, cookie = #{cookie} WHERE user_id = #{userID}")
     int updateLastLoginTimeAndCookie(@Param("userID") long userID, @Param("lastLoginTime") Date lastLoginTime, @Param("cookie") String cookie);

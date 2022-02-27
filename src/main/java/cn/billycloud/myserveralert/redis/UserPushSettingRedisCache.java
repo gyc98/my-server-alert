@@ -36,6 +36,7 @@ public class UserPushSettingRedisCache {
                 }
             }
             if(userPushSettingInfo != null){
+                log.info("从缓存中获取用户push setting信息");
                 return Result.success(ResultCode.SUCCESS, userPushSettingInfo);//将缓存中的对象返回
             }
         }catch (Exception e){
@@ -56,7 +57,8 @@ public class UserPushSettingRedisCache {
     }
 
     //写入数据库
-    public Result setUserPushSettingInfo(long userID, UserPushSettingInfo userPushSettingInfo){
+    public Result setUserPushSettingInfo(UserPushSettingInfo userPushSettingInfo){
+        long userID = userPushSettingInfo.getUserID();
         //先将缓存中的值清空
         redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, "", 10, TimeUnit.SECONDS);
         String checkStr = (String) redisTemplate.opsForValue().get("UserPushSettingInfo_" + userID);
@@ -66,7 +68,6 @@ public class UserPushSettingRedisCache {
         }
 
         //先保存到数据库
-
         int res = userPushSettingMapper.addSetting(userPushSettingInfo);
         if(res > 0){
             //保存到缓存中

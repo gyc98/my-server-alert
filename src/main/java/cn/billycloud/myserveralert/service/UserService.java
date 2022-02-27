@@ -3,6 +3,7 @@ package cn.billycloud.myserveralert.service;
 import cn.billycloud.myserveralert.dao.mapper.UserMapper;
 import cn.billycloud.myserveralert.entity.CookieInfo;
 import cn.billycloud.myserveralert.entity.UserInfo;
+import cn.billycloud.myserveralert.redis.UserCookieRedisCache;
 import cn.billycloud.myserveralert.util.MyException;
 import cn.billycloud.myserveralert.util.Result;
 import cn.billycloud.myserveralert.util.ResultCode;
@@ -25,6 +26,8 @@ public class UserService {
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private UserCookieRedisCache userCookieRedisCache;
 
     public Result addNewUser(String userName, String passwordSet) {
         if(userName == null || passwordSet == null){
@@ -96,13 +99,26 @@ public class UserService {
 
                 //密码一致
                 //更新登录时间
-                int res = userMapper.updateLastLoginTimeAndCookie(userID, new Date(), cookieInfo.getCookieVal());
-                if(res > 0){
+//                int res = userMapper.updateLastLoginTimeAndCookie(userID, new Date(), cookieInfo.getCookieVal());
+
+                //保存cookie
+                userInfo.setCookie(cookieInfo.getCookieVal());
+                userInfo.setLastLoginTime(new Date());
+                Result result = userCookieRedisCache.setCookie(userInfo);
+
+                if(ResultCode.SUCCESS.code() == result.getCode()){
+                    //成功保存到数据库和缓存
                     return Result.success(ResultCode.SUCCESS, cookieInfo);
                 }else{
-                    //密码不对
                     return Result.failure(ResultCode.FAILURE, "无法登录");
                 }
+
+//                if(res > 0){
+//                    return Result.success(ResultCode.SUCCESS, cookieInfo);
+//                }else{
+//                    //密码不对
+//                    return Result.failure(ResultCode.FAILURE, "无法登录");
+//                }
             }else{
                 //密码不对
                 return Result.failure(ResultCode.DATA_IS_WRONG, "密码错误");
@@ -116,7 +132,14 @@ public class UserService {
     //检查cookie
     public UserInfo checkCookie(CookieInfo cookieInfo) {
         try {
-            UserInfo userInfo = userMapper.selectByCookie(cookieInfo.getCookieVal());
+            Result result = userCookieRedisCache.getCookie(cookieInfo.getCookieVal());
+            UserInfo userInfo = null;
+            if(ResultCode.SUCCESS.code() == result.getCode()){
+                userInfo = (UserInfo)result.getData();
+            }
+            if(userInfo == null){
+                return null;
+            }
             if(userInfo.getUserID() == cookieInfo.getUserID() && userInfo.getUserName().equals(cookieInfo.getUserName())){
                 return userInfo;
             }else{
@@ -126,7 +149,6 @@ public class UserService {
             log.info("cookie检查异常", e);
             return null;
         }
-
     }
 
 

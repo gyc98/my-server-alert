@@ -34,7 +34,7 @@ public class PushSettingController {
 
     @RequestMapping(value = "/set", method = RequestMethod.POST)
     @ResponseBody
-    public Result getPushSetting(HttpServletRequest request, HttpServletResponse response, @RequestBody UserPushSettingInfo userPushSettingInfo){
+    public Result setPushSetting(HttpServletRequest request, HttpServletResponse response, @RequestBody UserPushSettingInfo userPushSettingInfo){
         UserInfo userInfo = CookieUtil.checkCookie(request);
         if(userInfo == null){
             return Result.failure(ResultCode.USER_NOT_LOGGED_IN);//用户未登录

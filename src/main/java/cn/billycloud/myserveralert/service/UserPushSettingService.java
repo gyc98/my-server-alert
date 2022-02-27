@@ -39,7 +39,7 @@ public class UserPushSettingService {
             return Result.failure(ResultCode.DATA_IS_WRONG, "请输入有效信息");
         }
         //先将之前缓存中的设置为控制
-        Result res = userPushSettingRedisCache.setUserPushSettingInfo(userPushSettingInfo.getUserID(), null);
+        Result res = userPushSettingRedisCache.setUserPushSettingInfo(userPushSettingInfo);
         return res;
     }
 }
