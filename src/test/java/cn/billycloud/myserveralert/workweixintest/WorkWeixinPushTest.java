@@ -12,6 +12,9 @@ public class WorkWeixinPushTest {
 
     @Test
     public void test(){
-        workWeixinMessagePushService.push(22, "测试消息");
+        for(int i = 0; i < 10; i++){
+            workWeixinMessagePushService.push(22, "测试消息: " + i);
+        }
+
     }
 }

@@ -3,6 +3,7 @@ package cn.billycloud.myserveralert.service.workweixin;
 import cn.billycloud.myserveralert.dao.mapper.UserTokenMapper;
 import cn.billycloud.myserveralert.entity.UserPushSettingInfo;
 import cn.billycloud.myserveralert.entity.WorkWeixinAccessTokenInfo;
+import cn.billycloud.myserveralert.redis.UserTokenRedisCache;
 import cn.billycloud.myserveralert.service.UserPushSettingService;
 import cn.billycloud.myserveralert.service.http.GetHelper;
 import cn.billycloud.myserveralert.util.Result;
@@ -24,18 +25,39 @@ public class WorkWeixinAccessTokenService {
     private UserTokenMapper userTokenMapper;
     @Autowired
     private UserPushSettingService userPushSettingService;
+    @Autowired
+    private UserTokenRedisCache userTokenRedisCache;
 
     private final String url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken";
 
     //可能返回null
     public WorkWeixinAccessTokenInfo getAccessToken(long userID){
-        //先查询数据库
-        WorkWeixinAccessTokenInfo workWeixinAccessTokenInfo = userTokenMapper.selectWorkWeixinToken(userID);
+        //先查询缓存
+        Result result = userTokenRedisCache.getWorkWeixinAccessTokenInfo(userID);
+        WorkWeixinAccessTokenInfo workWeixinAccessTokenInfo = null;
+        if(ResultCode.INTERFACE_EXCEED_LOAD.code() == result.getCode()){
+            //访问禁止
+            log.info("请求" + userID + "的企业微信token访问过高，暂时不可用");
+            return null;
+        }else if(ResultCode.SUCCESS.code() == result.getCode()){
+            workWeixinAccessTokenInfo = (WorkWeixinAccessTokenInfo)result.getData();
+        }
+        //缓存里面没有
+        if(workWeixinAccessTokenInfo == null){
+            //应该标记一个临时空值 避免连续向数据库或远端获取
+            userTokenRedisCache.setWorkWeixinAccessTokenInfo(userID, null);
+            //缓存没有 就查询数据库
+            workWeixinAccessTokenInfo = userTokenMapper.selectWorkWeixinToken(userID);
+        }
+        //从数据库或缓存中获取到的对象
         if(workWeixinAccessTokenInfo != null && workWeixinAccessTokenInfo.getExpireTime().after(new Date())){
+            //加入缓存
+            userTokenRedisCache.setWorkWeixinAccessTokenInfo(userID, workWeixinAccessTokenInfo);
             return workWeixinAccessTokenInfo;
         }
-        //获取新的
-        Result result = userPushSettingService.getUserPushSettingInfo(userID);
+        //没有或已经过期
+        //向远程获取
+        result = userPushSettingService.getUserPushSettingInfo(userID);
         if(ResultCode.SUCCESS.code() == result.getCode()){
             UserPushSettingInfo userPushSettingInfo = (UserPushSettingInfo)result.getData();
             if(userPushSettingInfo.isWorkWeixinFilled()){
@@ -48,6 +70,8 @@ public class WorkWeixinAccessTokenService {
             if(res == 0){
                 log.error("保存企业微信accesstoken出错");
             }
+            //保存进缓存
+            userTokenRedisCache.setWorkWeixinAccessTokenInfo(userID, workWeixinAccessTokenInfo);
         }
         return workWeixinAccessTokenInfo;
     }
