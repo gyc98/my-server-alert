@@ -81,7 +81,7 @@ public class WorkWeixinMessagePushService implements MessagePushService {
             log.info("errCode: " + errCode + "  errMsg: " + errMsg);
             if(errCode == 0){
                 return Result.success(ResultCode.SUCCESS, errMsg);
-            }else if(errCode == 40014){
+            }else if(errCode == 40014 || errCode == 42001){//token无效或过期
                 //重试 是否重试由上层决定
                 return Result.failure(ResultCode.RETRY);
             }else {
