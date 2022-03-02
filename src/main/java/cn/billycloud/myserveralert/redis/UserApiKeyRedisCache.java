@@ -11,11 +11,13 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
+@Transactional
 public class UserApiKeyRedisCache {
     @Autowired
     private RedisTemplate redisTemplate;
