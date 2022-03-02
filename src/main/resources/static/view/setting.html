@@ -79,7 +79,10 @@
                                     <input class="am-form-field am-radius" id="apikeyInput" readonly>
                                 </div>
                             
-                                <p><input type="button" value="重新生成" class="am-btn am-btn-default" id="flushApikey"></button></p>
+                                <p>
+                                    <input type="button" value="显示api_key" class="am-btn am-btn-default" id="showApikey"></button>
+                                    <input type="button" value="重新生成" class="am-btn am-btn-default" id="flushApikey"></button>
+                                </p>
                             </fieldset>
                         </form>
 
@@ -111,7 +114,8 @@
                     clearCookie();
                 }else{
                     getSetting();
-                    getApiKey();
+                    //点击之后再加载
+                    //getApiKey();
                 }
             });
 
@@ -186,6 +190,10 @@
 
             });
 
+            $("#showApikey").click(function(){
+                getApiKey();
+            });
+
             $("#flushApikey").click(function(){
                 $.ajax({
                     type: "POST",
@@ -205,21 +213,25 @@
             });
 
             $("#push").click(function(){
-                $.ajax({
-                    type: "POST",
-                    url: '/message/push',
-                    dataType: "json",
-                    contentType: "application/json; charset=utf-8",
-                    data: JSON.stringify({
-                        api_key: $('#apikeyInput').val(),
-                        message: $('#pushMessageInput').val()
-                    }),
-                    success: function (data) {
-                        code = data['code'];
-                        msg = data['msg'];
-                        alert("code: " + code + "\nmsg: " + msg);
-                    }
-                });
+                if($('#apikeyInput').val() == ''){
+                    alert("请先获取api_key")
+                }else{
+                    $.ajax({
+                        type: "POST",
+                        url: '/message/push',
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({
+                            api_key: $('#apikeyInput').val(),
+                            message: $('#pushMessageInput').val()
+                        }),
+                        success: function (data) {
+                            code = data['code'];
+                            msg = data['msg'];
+                            alert("code: " + code + "\nmsg: " + msg);
+                        }
+                    });
+                }
 
             });
             
