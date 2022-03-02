@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Controller
@@ -36,5 +37,15 @@ public class RedisTestController {
     @ResponseBody
     public String getRedis(@RequestParam("key") String key){
         return (String) redisTemplate.opsForValue().get(key);
+    }
+
+    @RequestMapping(value = "/test")
+    @ResponseBody
+    public String test(){
+        redisTemplate.opsForValue().set("test_key", "", 10, TimeUnit.SECONDS);
+        String str = (String) redisTemplate.opsForValue().get("test_key");
+        System.out.println(str.isEmpty());
+        System.out.println(str);
+        return str;
     }
 }
