@@ -12,7 +12,7 @@ public class UserApiKeyMapperTest {
     @Autowired
     private UserApiKeyRedisCache userApiKeyRedisCache;
 
-    @Test
+//    @Test
     public void test(){
         Result result = userApiKeyRedisCache.setApiKey(10, "111");
         System.out.println(result.getMsg());

@@ -15,7 +15,7 @@ public class UserMapperTest {
     @Autowired
     private UserMapper userMapper;
 
-    @Test
+//    @Test
     public void insertTest(){
         UserInfo userInfo = new UserInfo("test_user", "", "123", new Date(), new Date());
         int res = userMapper.insert(userInfo);
@@ -25,7 +25,7 @@ public class UserMapperTest {
 
     }
 
-    @Test
+//    @Test
     public void selectTest(){
         List<UserInfo> list = userMapper.selectAll();
         for(UserInfo userInfo : list){

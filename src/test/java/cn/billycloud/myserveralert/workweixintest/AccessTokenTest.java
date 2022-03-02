@@ -17,7 +17,7 @@ public class AccessTokenTest {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    @Test
+//    @Test
     public void test(){
         WorkWeixinAccessTokenInfo workWeixinAccessTokenInfo = accessTokenService.getAccessToken(22);
         redisTemplate.opsForValue().set("WorkWeixinAccessTokenInfo_" + 22, JSON.toJSON(workWeixinAccessTokenInfo).toString(), 1, TimeUnit.HOURS);
@@ -25,7 +25,7 @@ public class AccessTokenTest {
         System.out.println(workWeixinAccessTokenInfo.getExpireTime());
     }
 
-    @Test
+//    @Test
     public void testRedis(){
         WorkWeixinAccessTokenInfo workWeixinAccessTokenInfo = JSON.parseObject((String) redisTemplate.opsForValue().get("WorkWeixinAccessTokenInfo_" + 22), WorkWeixinAccessTokenInfo.class);
         System.out.println(workWeixinAccessTokenInfo.getAccessToken());

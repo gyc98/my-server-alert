@@ -14,7 +14,7 @@ public class UserPushSettingMapperTest {
     @Autowired
     private UserPushSettingMapper userPushSettingMapper;
 
-    @Test
+//    @Test
     public void insertTest(){
         UserPushSettingInfo userPushSettingInfo = new UserPushSettingInfo(10, "a", "b", "v", "c");
         int res = userPushSettingMapper.addSetting(userPushSettingInfo);

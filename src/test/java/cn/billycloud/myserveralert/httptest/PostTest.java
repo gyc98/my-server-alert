@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 @SpringBootTest
 public class PostTest {
-    @Test
+//    @Test
     public void test() throws Exception {
         GetHelper.send("https://www.baidu.com", new HashMap<>());
     }

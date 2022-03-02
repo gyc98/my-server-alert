@@ -12,7 +12,7 @@ public class RabbitTest {
     @Autowired
     private RabbitSender rabbitSender;
 
-    @Test
+//    @Test
     public void test() throws InterruptedException {
         rabbitSender.send("123");
         Thread.sleep(5000);

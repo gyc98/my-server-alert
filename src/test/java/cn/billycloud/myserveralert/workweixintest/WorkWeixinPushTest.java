@@ -11,7 +11,7 @@ public class WorkWeixinPushTest {
     @Autowired
     private WorkWeixinMessagePushService workWeixinMessagePushService;
 
-    @Test
+//    @Test
     public void test(){
         Result result = workWeixinMessagePushService.push(22, "测试消息: ", true);
         System.out.println(result);

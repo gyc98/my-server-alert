@@ -11,7 +11,7 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
-    @Test
+//    @Test
     public void addUserTest(){
         Result result = userService.addNewUser("testUser", "12345678");
         System.out.println(result);
