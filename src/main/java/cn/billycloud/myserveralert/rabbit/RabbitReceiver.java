@@ -10,10 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 
 @Service
+@ConditionalOnProperty(name="use_rabbit_receiver", havingValue="true")
 @RabbitListener(queues = "${my.rabbitmq.queue.name}")
 @Slf4j
 public class RabbitReceiver {
