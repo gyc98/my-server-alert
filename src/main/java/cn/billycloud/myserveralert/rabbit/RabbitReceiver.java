@@ -25,29 +25,34 @@ public class RabbitReceiver {
 
     @RabbitHandler
     public void process(String context) {
-//        System.out.println("Receiver  : " + context);
-        //处理推送
-        JSONObject jsonParam = JSON.parseObject(context);
-        String apiKey = jsonParam.getString("api_key");
-        String message = jsonParam.getString("message");
+        Long userID = null;
+        String message = null;
+        try {
+            //处理推送
+            JSONObject jsonParam = JSON.parseObject(context);
+            String apiKey = jsonParam.getString("api_key");
+            message = jsonParam.getString("message");
 
-        if(apiKey == null || apiKey.isEmpty()){
-            log.error("没有api_key");
+            if(apiKey == null || apiKey.isEmpty()){
+                log.error("没有api_key");
+                return;
+            }
+            if(message == null || message.isEmpty()){
+                log.error("没有消息");
+                return;
+            }
+            //检查api_key
+            userID = userApiKeyService.getUserInfoByApiKey(apiKey);
+            if(userID == null){
+                log.error("无法通过api_key获取到用户: " + apiKey);
+                return;
+            }
+
+        }catch (Exception e){
+            log.error("处理消息队列中消息失败", e);
             return;
-//            return Result.failure(ResultCode.DATA_IS_WRONG, "请输入api_key");
         }
-        if(message == null || message.isEmpty()){
-            log.error("没有消息");
-            return;
-//            return Result.failure(ResultCode.DATA_IS_WRONG, "请输入msg");
-        }
-        //检查api_key
-        Long userID = userApiKeyService.getUserInfoByApiKey(apiKey);
-        if(userID == null){
-            log.error("无法通过api_key获取到用户: " + apiKey);
-            return;
-//            return Result.failure(ResultCode.DATA_IS_WRONG, "api_key无效");
-        }
+
         try {
             Result result = workWeixinMessagePushService.push(userID, message, true);
             if((int)ResultCode.SUCCESS.code() != result.getCode()){
@@ -58,6 +63,7 @@ public class RabbitReceiver {
         }catch (Exception e){
             log.error("推送异常", e);
         }
+
 
     }
 }
