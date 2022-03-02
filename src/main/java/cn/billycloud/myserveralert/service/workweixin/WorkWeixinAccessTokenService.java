@@ -78,6 +78,39 @@ public class WorkWeixinAccessTokenService {
         return workWeixinAccessTokenInfo;
     }
 
+    //强制刷新accessToken
+    public boolean forceFlushAccessToken(long userID){
+        log.info("清空user的access_token：" + userID);
+        //先清数据库
+        int res = userTokenMapper.deleteWorkWeixinToken(userID);
+        if(res == 0){
+            log.info("未删除数据库中的accesstoken，可能没有");
+        }
+        //先清除缓存
+        userTokenRedisCache.setWorkWeixinAccessTokenInfo(userID, null);
+
+        //向远程获取
+        WorkWeixinAccessTokenInfo workWeixinAccessTokenInfo = null;
+        Result result = userPushSettingService.getUserPushSettingInfo(userID);
+        if((int)ResultCode.SUCCESS.code() == result.getCode()){
+            UserPushSettingInfo userPushSettingInfo = (UserPushSettingInfo)result.getData();
+            if(userPushSettingInfo.isWorkWeixinFilled()){
+                workWeixinAccessTokenInfo = requestAccessToken(userPushSettingInfo.getWorkWeixinCorpID(), userPushSettingInfo.getWorkWeixinCorpSecret());
+            }
+        }
+        if(workWeixinAccessTokenInfo != null){
+            //保存进数据库
+            res = userTokenMapper.setWorkWeixinToken(userID, workWeixinAccessTokenInfo);
+            if(res == 0){
+                log.error("保存企业微信accesstoken出错");
+            }
+            //保存进缓存
+            userTokenRedisCache.setWorkWeixinAccessTokenInfo(userID, workWeixinAccessTokenInfo);
+            return true;
+        }
+        return false;
+    }
+
     //请求accessToken
     private WorkWeixinAccessTokenInfo requestAccessToken(String corpid, String corpsecret){
         try {

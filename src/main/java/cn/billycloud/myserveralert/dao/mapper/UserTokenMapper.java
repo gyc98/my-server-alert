@@ -16,4 +16,7 @@ public interface UserTokenMapper {
             "VALUES (#{userID}, #{token.accessToken}, #{token.expireTime}) ON DUPLICATE KEY UPDATE " +
             "workweixin_access_token = #{token.accessToken}, workweixin_access_expire_time = #{token.expireTime}")
     int setWorkWeixinToken(@Param("userID") long userID, @Param("token") WorkWeixinAccessTokenInfo token);
+
+    @Delete("Delete From user_token where user_id = #{userID}")
+    int deleteWorkWeixinToken(@Param("userID") long userID);
 }

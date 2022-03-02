@@ -49,7 +49,7 @@ public class RabbitReceiver {
 //            return Result.failure(ResultCode.DATA_IS_WRONG, "api_key无效");
         }
         try {
-            Result result = workWeixinMessagePushService.push(userID, message);
+            Result result = workWeixinMessagePushService.push(userID, message, true);
             if((int)ResultCode.SUCCESS.code() != result.getCode()){
                 log.error("推送失败：" + result);
             }else{

@@ -26,7 +26,7 @@ public class WorkWeixinMessagePushService implements MessagePushService {
     private UserPushSettingService userPushSettingService;
 
     @Override
-    public Result push(long userID, String message) {
+    public Result push(long userID, String message, boolean allowRetry) {
         //先获取企业微信的accesstoken
         WorkWeixinAccessTokenInfo workWeixinAccessTokenInfo = accessTokenService.getAccessToken(userID);
         if(workWeixinAccessTokenInfo == null){
@@ -43,7 +43,17 @@ public class WorkWeixinMessagePushService implements MessagePushService {
             return Result.failure(ResultCode.RESULE_DATA_NONE, "无法获取用户的推送设置");
         }
         //发送请求
-        return sendMessage(workWeixinAccessTokenInfo.getAccessToken(), userPushSettingInfo.getWorkWeixinAgentID(), userPushSettingInfo.getWorkWeixinToUser(), message);
+        result = sendMessage(workWeixinAccessTokenInfo.getAccessToken(), userPushSettingInfo.getWorkWeixinAgentID(), userPushSettingInfo.getWorkWeixinToUser(), message);
+        if((int)ResultCode.RETRY.code() == result.getCode() && allowRetry){
+            //access token失效 重新获取
+            if(accessTokenService.forceFlushAccessToken(userID)){
+                //重试一次
+                result = push(userID, message, false);
+            }else{
+                log.info("无法重新获取企业微信access token 不能重试");
+            }
+        }
+        return result;
     }
 
     private final String url = "https://qyapi.weixin.qq.com/cgi-bin/message/send";
@@ -71,7 +81,10 @@ public class WorkWeixinMessagePushService implements MessagePushService {
             log.info("errCode: " + errCode + "  errMsg: " + errMsg);
             if(errCode == 0){
                 return Result.success(ResultCode.SUCCESS, errMsg);
-            }else{
+            }else if(errCode == 40014){
+                //重试 是否重试由上层决定
+                return Result.failure(ResultCode.RETRY);
+            }else {
                 return Result.success(ResultCode.FAILURE, errCode + ": " + errMsg);
             }
         }catch (Exception e){
