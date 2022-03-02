@@ -8,6 +8,7 @@ import cn.billycloud.myserveralert.util.ResultCode;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,9 @@ public class UserPushSettingRedisCache {
     private RedisTemplate redisTemplate;
     @Autowired
     private UserPushSettingMapper userPushSettingMapper;
+
+    @Value("${cache.time.minutes}")
+    private int cacheTimeMinutes;
 
     //将数据库和缓存写在一起
     public Result getUserPushSettingInfo(long userID){
@@ -60,7 +64,7 @@ public class UserPushSettingRedisCache {
                 return Result.failure(ResultCode.RESULE_DATA_NONE);
             }else{
                 String json = JSON.toJSON(userPushSettingInfo).toString();
-                redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, json, 1, TimeUnit.HOURS);
+                redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, json, cacheTimeMinutes, TimeUnit.MINUTES);
                 return Result.success(ResultCode.SUCCESS, userPushSettingInfo);//将对象返回
             }
         }catch (Exception e){
@@ -99,7 +103,7 @@ public class UserPushSettingRedisCache {
             if(res > 0){
                 //保存到缓存中
                 String json = JSON.toJSON(userPushSettingInfo).toString();
-                redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, json, 1, TimeUnit.HOURS);
+                redisTemplate.opsForValue().set("UserPushSettingInfo_" + userID, json, cacheTimeMinutes, TimeUnit.MINUTES);
                 String checkStr = (String) redisTemplate.opsForValue().get("UserPushSettingInfo_" + userID);
                 if(checkStr != null && checkStr.equals(json)){
                     //缓存写入成功

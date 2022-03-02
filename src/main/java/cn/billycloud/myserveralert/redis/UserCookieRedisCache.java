@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,9 @@ public class UserCookieRedisCache {
     private UserMapper userMapper;
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Value("${cache.time.minutes}")
+    private int cacheTimeMinutes;
 
     //调用之前先确保userinfo中的上次登录时间和cookie信息改变了
     public Result setCookie(UserInfo userInfo){
@@ -50,7 +54,7 @@ public class UserCookieRedisCache {
             try {
                 //保存到缓存中
                 String json = JSON.toJSON(userInfo).toString();
-                redisTemplate.opsForValue().set(cacheKey, json, 1, TimeUnit.HOURS);
+                redisTemplate.opsForValue().set(cacheKey, json, cacheTimeMinutes, TimeUnit.MINUTES);
                 checkStr = (String) redisTemplate.opsForValue().get(cacheKey);
                 if(checkStr != null && checkStr.equals(json)){
                     //缓存写入成功
@@ -104,7 +108,7 @@ public class UserCookieRedisCache {
             if(userInfo != null){
                 //保存到缓存中
                 String json = JSON.toJSON(userInfo).toString();
-                redisTemplate.opsForValue().set(cacheKey, json, 1, TimeUnit.HOURS);
+                redisTemplate.opsForValue().set(cacheKey, json, cacheTimeMinutes, TimeUnit.MINUTES);
                 return Result.success(ResultCode.SUCCESS, userInfo);
             }else{
                 redisTemplate.opsForValue().set(cacheKey, "", 10, TimeUnit.SECONDS);

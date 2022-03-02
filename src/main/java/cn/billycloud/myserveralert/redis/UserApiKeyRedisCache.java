@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,9 @@ public class UserApiKeyRedisCache {
     private RedisTemplate redisTemplate;
     @Autowired
     private UserApiKeyMapper userApiKeyMapper;
+
+    @Value("${cache.time.minutes}")
+    private int cacheTimeMinutes;
 
     public Result getUserIDByApiKey(String apiKey){
         //现在缓存中查找
@@ -51,7 +55,7 @@ public class UserApiKeyRedisCache {
             return Result.failure(ResultCode.RESULE_DATA_NONE);
         }else{
             //先保存
-            redisTemplate.opsForValue().set(cacheKey, String.valueOf(userID), 1, TimeUnit.HOURS);
+            redisTemplate.opsForValue().set(cacheKey, String.valueOf(userID), cacheTimeMinutes, TimeUnit.MINUTES);
             return Result.success(ResultCode.SUCCESS, userID);//将对象返回
         }
     }
@@ -81,7 +85,7 @@ public class UserApiKeyRedisCache {
         if(res > 0){
             try {
                 //保存到缓存中
-                redisTemplate.opsForValue().set(cacheKey, String.valueOf(userID), 1, TimeUnit.HOURS);
+                redisTemplate.opsForValue().set(cacheKey, String.valueOf(userID), cacheTimeMinutes, TimeUnit.MINUTES);
                 checkStr = (String) redisTemplate.opsForValue().get(cacheKey);
                 if(checkStr != null && checkStr.equals(String.valueOf(userID))){
                     //缓存写入成功
