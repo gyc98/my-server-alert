@@ -2,6 +2,7 @@ package cn.billycloud.myserveralert.controller;
 
 import cn.billycloud.myserveralert.entity.UserInfo;
 import cn.billycloud.myserveralert.service.UserApiKeyService;
+import cn.billycloud.myserveralert.util.NeedCookieCheck;
 import cn.billycloud.myserveralert.util.Result;
 import cn.billycloud.myserveralert.util.ResultCode;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +27,11 @@ public class ApiKeyController {
 
     @RequestMapping(value = "/flush")
     @ResponseBody
+    @NeedCookieCheck
     public Result flush(HttpServletRequest request, HttpServletResponse response){
-        //先检查身份
-        UserInfo userInfo = CookieUtil.checkCookie(request);
+        UserInfo userInfo = CookieAspect.userInfoThreadLocal.get();
+//        //先检查身份
+//        UserInfo userInfo = CookieUtil.checkCookie(request);
         if(userInfo == null){
             return Result.failure(ResultCode.USER_NOT_LOGGED_IN);//用户未登录
         }
@@ -38,9 +41,11 @@ public class ApiKeyController {
 
     @RequestMapping(value = "/get")
     @ResponseBody
+    @NeedCookieCheck
     public Result get(HttpServletRequest request, HttpServletResponse response){
-        //先检查身份
-        UserInfo userInfo = CookieUtil.checkCookie(request);
+        UserInfo userInfo = CookieAspect.userInfoThreadLocal.get();
+//        //先检查身份
+//        UserInfo userInfo = CookieUtil.checkCookie(request);
         if(userInfo == null){
             return Result.failure(ResultCode.USER_NOT_LOGGED_IN);//用户未登录
         }

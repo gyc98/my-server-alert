@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.concurrent.TimeUnit;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 @SpringBootApplication
 @Slf4j
 @MapperScan("cn.billycloud.myserveralert.dao.mapper")
+//@EnableAspectJAutoProxy
 public class MyServerAlertApplication {
 
 	public static void main(String[] args) {
