@@ -3,6 +3,7 @@ package cn.billycloud.myserveralert.controller;
 import cn.billycloud.myserveralert.entity.CookieInfo;
 import cn.billycloud.myserveralert.entity.UserInfo;
 import cn.billycloud.myserveralert.service.UserService;
+import cn.billycloud.myserveralert.util.NeedCookieCheck;
 import cn.billycloud.myserveralert.util.Result;
 import cn.billycloud.myserveralert.util.ResultCode;
 import com.alibaba.fastjson.JSONObject;
@@ -54,8 +55,10 @@ public class UserController {
 
     @RequestMapping("/cookie")
     @ResponseBody
+    @NeedCookieCheck
     public Result cookieCheck(HttpServletRequest request, HttpServletResponse response){
-        UserInfo userInfo = CookieUtil.checkCookie(request);
+        UserInfo userInfo = CookieAspect.userInfoThreadLocal.get();
+//        UserInfo userInfo = CookieUtil.checkCookie(request);
         if(userInfo == null){
             return Result.failure(ResultCode.DATA_IS_WRONG);
         }else{

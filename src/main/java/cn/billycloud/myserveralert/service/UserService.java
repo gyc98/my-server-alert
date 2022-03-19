@@ -8,6 +8,7 @@ import cn.billycloud.myserveralert.util.MyException;
 import cn.billycloud.myserveralert.util.Result;
 import cn.billycloud.myserveralert.util.ResultCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
